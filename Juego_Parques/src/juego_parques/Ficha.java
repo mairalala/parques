@@ -133,52 +133,52 @@ public class Ficha {
     }
 
     public void mover(int pasos, Tablero tablero) {
-    int totalCasillas = tablero.getCasillas().size();
 
-    for (int i = 0; i < pasos; i++) {
+        int totalCasillas = tablero.getCasillas().size();
+        int entradaPasillo = tablero.getEntradaPasillo(colorStr);
+        int destinoFinal = (indiceCasilla + pasos) % totalCasillas;
 
-        // --- PASILLO ---
+        // -------------------------------------------------------------------
+        // 1. VERIFICAR SI EL MOVIMIENTO TERMINA EXACTAMENTE EN LA ENTRADA
+        // -------------------------------------------------------------------
+        if (!estaEnPasillo() && destinoFinal == entradaPasillo) {
+            // entrar directamente
+            indiceCasilla = -1;         // fuera del tablero
+            indiceCasillaPasillo = 0;   // primer casilla del pasillo
+            posicion = tablero.getPasillos().get(colorStr).get(0).getPosicion();
+            return;
+        }
+
+        // -------------------------------------------------------------------
+        // 2. SI YA ESTÁ EN PASILLO
+        // -------------------------------------------------------------------
         if (estaEnPasillo()) {
             ArrayList<Casilla> pasillo = tablero.getPasillos().get(colorStr);
-            if (pasillo == null || pasillo.isEmpty()) return;
 
-            int prox = indiceCasillaPasillo + 1;
+            int destinoPasillo = indiceCasillaPasillo + pasos;
 
-            if (prox < pasillo.size()) {
-                indiceCasillaPasillo = prox;
-                posicion = pasillo.get(prox).getPosicion();
-            } else {
+            // Si excede la meta → NO SE MUEVE
+            if (destinoPasillo >= pasillo.size()) {
+                return;
+            }
+
+            indiceCasillaPasillo = destinoPasillo;
+            posicion = pasillo.get(destinoPasillo).getPosicion();
+
+            if (destinoPasillo == pasillo.size() - 1) {
                 enMeta = true;
                 posicion = tablero.getMetaPorColor(colorStr);
             }
-            continue;
+
+            return;
         }
 
-        // --- RUTA NORMAL ---
-        // 1. verificar si LA SIGUIENTE casilla es la entrada al pasillo
-        int siguiente = (indiceCasilla + 1) % totalCasillas;
-
-        if (siguiente == 55 && colorStr.equals("Rojo") ||
-            siguiente == 4 && colorStr.equals("Amarillo") ||
-            siguiente == 21 && colorStr.equals("Verde") ||
-            siguiente == 38 && colorStr.equals("Azul")) {
-
-            // ENTRAR AL PASILLO
-            indiceCasilla = -1;
-            indiceCasillaPasillo = 0;
-
-            ArrayList<Casilla> pasillo = tablero.getPasillos().get(colorStr);
-            posicion = pasillo.get(0).getPosicion();
-            continue;
-        }
-
-        // 2. si NO entra al pasillo, avanzar normal
-        indiceCasilla = siguiente;
+        // -------------------------------------------------------------------
+        // 3. MOVIMIENTO NORMAL, SIN ENTRAR AL PASILLO
+        // -------------------------------------------------------------------
+        indiceCasilla = destinoFinal;
         posicion = tablero.obtenerCasilla(indiceCasilla);
     }
-}
-
-
 
     public boolean haLlegadoAMeta() {
         return enMeta;

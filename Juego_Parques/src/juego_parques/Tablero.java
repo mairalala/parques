@@ -56,6 +56,23 @@ public class Tablero {
         }
         return 0;
     }
+    
+    public int getEntradaPasillo(String color) {
+    switch (color) {
+        case "Rojo":
+            return 55;     // entrada al pasillo rojo
+        case "Amarillo":
+            return 4;      // entrada al pasillo amarillo
+        case "Verde":
+            return 21;     // entrada al pasillo verde
+        case "Azul":
+            return 38;     // entrada al pasillo azul
+        default:
+            return -1;
+    }
+}
+
+    
 
     public Point obtenerCasilla(int indice) {
         if (indice < 0 || indice >= ruta.size()) {
