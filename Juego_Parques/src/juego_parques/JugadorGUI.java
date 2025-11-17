@@ -56,17 +56,17 @@ public class JugadorGUI extends JPanel {
 
         setLayout(new FlowLayout(FlowLayout.CENTER, 20, 10));
 
-        JButton botonLanzar = new JButton("🎲 Lanzar Dados");
+        JButton botonLanzar = new JButton(" Lanzar Dados");
         botonLanzar.setFont(new Font("Berlin Sans FB Demi", Font.BOLD, 18));
         botonLanzar.addActionListener(e -> lanzarDados());
         add(botonLanzar);
 
-        JButton botonPausa = new JButton("⏸ Pausa");
+        JButton botonPausa = new JButton(" Pausa");
         botonPausa.setFont(new Font("Berlin Sans FB Demi", Font.BOLD, 18));
         botonPausa.addActionListener(e -> pausarJuego());
         add(botonPausa);
 
-        JButton botonInfo = new JButton("ℹ Información");
+        JButton botonInfo = new JButton("?");
         botonInfo.setFont(new Font("Berlin Sans FB Demi", Font.BOLD, 18));
         botonInfo.addActionListener(e -> mostrarInformacion());
         add(botonInfo);
