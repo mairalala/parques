@@ -30,6 +30,8 @@ public class JuegoParquesGUI extends JFrame {
         terminarInicializacion();
         generarCasillasPregunta();
     }
+    JButton botonInfo = new JButton("Información");
+
 
     public void mostrarMensaje(String texto) {
         new MensajeEmergente(this, texto);

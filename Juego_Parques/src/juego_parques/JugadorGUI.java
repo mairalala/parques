@@ -21,6 +21,29 @@ public class JugadorGUI extends JPanel {
     private String categoriaSeleccionada;
     private Set<String> preguntasUsadas = new HashSet<>();
 
+    
+    private void mostrarInformacion() {
+    JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+
+    // Ruta de la imagen (colócala en la carpeta "resources" o dentro del proyecto)
+    ImageIcon imagen = new ImageIcon("src/juego_parques/inforcion.jpg");
+
+    // Ajustar tamaño si la imagen es muy grande
+    Image img = imagen.getImage().getScaledInstance(400, 300, Image.SCALE_SMOOTH);
+    ImageIcon imgEscalada = new ImageIcon(img);
+
+    JLabel etiqueta = new JLabel(imgEscalada);
+
+    JOptionPane.showMessageDialog(
+            parentFrame,
+            etiqueta,
+            "Información del Juego",
+            JOptionPane.PLAIN_MESSAGE
+    );
+}
+ 
+    
+    
     public JugadorGUI(Jugador[] jugadores, Tablero tablero, TableroPanel panelTablero,
             ReproductorSonido reproductor, PanelInfoLateral panelInfo,
             String categoriaSeleccionada) {
@@ -42,6 +65,11 @@ public class JugadorGUI extends JPanel {
         botonPausa.setFont(new Font("Berlin Sans FB Demi", Font.BOLD, 18));
         botonPausa.addActionListener(e -> pausarJuego());
         add(botonPausa);
+
+        JButton botonInfo = new JButton("ℹ Información");
+        botonInfo.setFont(new Font("Berlin Sans FB Demi", Font.BOLD, 18));
+        botonInfo.addActionListener(e -> mostrarInformacion());
+        add(botonInfo);
 
         actualizarPanelInfo();
     }
