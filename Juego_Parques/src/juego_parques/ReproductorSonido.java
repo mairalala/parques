@@ -42,7 +42,7 @@ public class ReproductorSonido {
     }
 
     // ------------------------
-    //   MÚSICA DE FONDO
+    //    MÚSICA DE FONDO
     // ------------------------
     /**
      * Reproduce una música de fondo especificada por archivo en bucle infinito.
@@ -52,6 +52,7 @@ public class ReproductorSonido {
 
         try {
             // Cargar archivo desde la carpeta de recursos
+            // Asegúrate de que esta ruta de archivo sea la correcta para tu música de fondo
             InputStream is = getClass().getResourceAsStream("/juego_parques/Inspiring-Ascent-_0be33efa125b4940864f156cafbaa28c_.wav");
 
             if (is == null) {
@@ -77,8 +78,40 @@ public class ReproductorSonido {
         }
     }
 
+    // ------------------------------------
+    //  NUEVOS MÉTODOS DE EFECTOS DE SONIDO
+    // ------------------------------------
+
+    /**
+     * Reproduce el sonido de lanzar los dados.
+     */
+    public void lanzarDados() {
+        reproducirEfecto("dice-142528.wav"); // <--- Archivo para lanzar dados
+    }
+
+    /**
+     * Reproduce el sonido cuando una ficha es "comida" (capturada).
+     */
+    public void comerFicha() {
+        reproducirEfecto("07-comerpersonaje-98937.wav"); // <--- Archivo para comer ficha
+    }
+
+    /**
+     * Reproduce el sonido cuando una ficha sale de la base al tablero.
+     */
+    public void sacarFichaDeBase() {
+        reproducirEfecto("winner-game-sound-404167.wav"); // <--- Archivo para sacar ficha
+    }
+
+    /**
+     * Reproduce el sonido de victoria o cuando un jugador llega a la meta con todas las fichas.
+     */
+    public void victoria() {
+        reproducirEfecto("level-win-6416.wav"); // <--- Archivo de victoria/fin de juego
+    }
+
     // ------------------------
-    //   EFECTOS DE SONIDO
+    //    EFECTOS DE SONIDO (EXISTENTE)
     // ------------------------
     /**
      * Reproduce un efecto de sonido sin detener la música. Cada efecto se
@@ -111,7 +144,7 @@ public class ReproductorSonido {
     }
 
     // ------------------------
-    //   AJUSTE DE VOLUMEN EN DECIBELES
+    //    AJUSTE DE VOLUMEN EN DECIBELES (EXISTENTE)
     // ------------------------
     /**
      * Ajusta el volumen de un clip en decibelios (dB) Convierte 0-1 → escala de
@@ -132,7 +165,7 @@ public class ReproductorSonido {
     }
 
     // ------------------------
-    //   CONTROL DE REPRODUCCIÓN
+    //    CONTROL DE REPRODUCCIÓN (EXISTENTE)
     // ------------------------
     /**
      * Detiene la música de fondo si está en reproducción.
@@ -160,7 +193,7 @@ public class ReproductorSonido {
     }
 
     // ------------------------
-    //   GETTERS
+    //    GETTERS (EXISTENTE)
     // ------------------------
     public float getVolumenMusica() {
         return volumenMusica;

@@ -21,29 +21,26 @@ public class JugadorGUI extends JPanel {
     private String categoriaSeleccionada;
     private Set<String> preguntasUsadas = new HashSet<>();
 
-    
     private void mostrarInformacion() {
-    JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
 
-    // Ruta de la imagen (colócala en la carpeta "resources" o dentro del proyecto)
-    ImageIcon imagen = new ImageIcon("src/juego_parques/informacion.jpg");
+        // Ruta de la imagen (colócala en la carpeta "resources" o dentro del proyecto)
+        ImageIcon imagen = new ImageIcon("src/juego_parques/informacion.jpg");
 
-    // Ajustar tamaño si la imagen es muy grande
-    Image img = imagen.getImage().getScaledInstance(400, 300, Image.SCALE_SMOOTH);
-    ImageIcon imgEscalada = new ImageIcon(img);
+        // Ajustar tamaño si la imagen es muy grande
+        Image img = imagen.getImage().getScaledInstance(400, 300, Image.SCALE_SMOOTH);
+        ImageIcon imgEscalada = new ImageIcon(img);
 
-    JLabel etiqueta = new JLabel(imgEscalada);
+        JLabel etiqueta = new JLabel(imgEscalada);
 
-    JOptionPane.showMessageDialog(
-            parentFrame,
-            etiqueta,
-            "Información del Juego",
-            JOptionPane.PLAIN_MESSAGE
-    );
-}
- 
-    
-    
+        JOptionPane.showMessageDialog(
+                parentFrame,
+                etiqueta,
+                "Información del Juego",
+                JOptionPane.PLAIN_MESSAGE
+        );
+    }
+
     public JugadorGUI(Jugador[] jugadores, Tablero tablero, TableroPanel panelTablero,
             ReproductorSonido reproductor, PanelInfoLateral panelInfo,
             String categoriaSeleccionada) {
@@ -82,9 +79,11 @@ public class JugadorGUI extends JPanel {
         int dado1 = valores[0];
         int dado2 = valores[1];
         int total = dado1 + dado2;
+        reproductor.lanzarDados();reproductor.lanzarDados();
 
         panelTablero.setDados(dado1, dado2);
         panelTablero.repaint();
+        
 
         boolean esPar = (dado1 == dado2);
 
@@ -191,6 +190,7 @@ public class JugadorGUI extends JPanel {
 
             int salida = tablero.getSalidaIndex(jugador.getColorStr(), tablero.getCantidadJugadores());
             ficha.sacarDeBase(salida, tablero);
+            reproductor.sacarFichaDeBase();
 
             fichaSeleccionada = ficha;
             panelTablero.setFichaActiva(fichaSeleccionada);

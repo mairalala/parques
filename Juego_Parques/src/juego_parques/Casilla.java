@@ -10,6 +10,7 @@ public class Casilla {
     private String color;
     private boolean preguntaRespondida = false;
     private String categoria; // <-- NUEVO ATRIBUTO
+    private Ficha fichaOcupante = null;
 
     public Casilla(Point pos, String tipo, String color) {
         this.posicion = pos;
@@ -96,6 +97,18 @@ public class Casilla {
 
     public void setCategoria(String categoria) {
         this.categoria = categoria;
+    }
+
+    public Ficha getFicha() {
+        return fichaOcupante;
+    }
+
+    public void setFicha(Ficha f) {
+        this.fichaOcupante = f;
+    }
+
+    public boolean tieneFicha() {
+        return fichaOcupante != null;
     }
     //holi
 }
