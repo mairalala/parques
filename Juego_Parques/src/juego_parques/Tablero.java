@@ -34,7 +34,6 @@ public class Tablero {
     public ArrayList<Casilla> getCasillas() {
         return ruta;
     }
-    
 
     public Map<String, ArrayList<Casilla>> getPasillos() {
         return pasillos;
@@ -115,30 +114,58 @@ public class Tablero {
     }
 
     private void inicializarPasillos() {
+
         pasillos.put("Amarillo", new ArrayList<>());
         pasillos.put("Verde", new ArrayList<>());
         pasillos.put("Azul", new ArrayList<>());
         pasillos.put("Rojo", new ArrayList<>());
 
+        // PASILLO AMARILLO
         for (int y = 17; y >= 11; y--) {
-            pasillos.get("Amarillo").add(new Casilla(new Point(8, y), "pasillo", "Amarillo"));
+            pasillos.get("Amarillo").add(
+                    new Casilla(new Point(8, y), "pasillo", "Amarillo")
+            );
         }
+
+        // PASILLO VERDE
         for (int x = 15; x >= 9; x--) {
-            pasillos.get("Verde").add(new Casilla(new Point(x, 9), "pasillo", "Verde"));
+            pasillos.get("Verde").add(
+                    new Casilla(new Point(x, 9), "pasillo", "Verde")
+            );
         }
+
+        // PASILLO AZUL
         for (int y = 1; y <= 7; y++) {
-            pasillos.get("Azul").add(new Casilla(new Point(8, y), "pasillo", "Azul"));
+            pasillos.get("Azul").add(
+                    new Casilla(new Point(8, y), "pasillo", "Azul")
+            );
         }
+
+        // PASILLO ROJO
         for (int x = 1; x <= 7; x++) {
-            pasillos.get("Rojo").add(new Casilla(new Point(x, 9), "pasillo", "Rojo"));
+            pasillos.get("Rojo").add(
+                    new Casilla(new Point(x, 9), "pasillo", "Rojo")
+            );
         }
     }
 
     private void inicializarMetas() {
-        metas.put("Rojo", new Point(7, 7));
-        metas.put("Amarillo", new Point(7, 11));
-        metas.put("Verde", new Point(11, 7));
-        metas.put("Azul", new Point(11, 11));
+
+        metas.put("Rojo",
+                pasillos.get("Rojo").get(pasillos.get("Rojo").size() - 1).getPosicion()
+        );
+
+        metas.put("Amarillo",
+                pasillos.get("Amarillo").get(pasillos.get("Amarillo").size() - 1).getPosicion()
+        );
+
+        metas.put("Verde",
+                pasillos.get("Verde").get(pasillos.get("Verde").size() - 1).getPosicion()
+        );
+
+        metas.put("Azul",
+                pasillos.get("Azul").get(pasillos.get("Azul").size() - 1).getPosicion()
+        );
     }
 
     private void generarCasillasPregunta() {
@@ -171,5 +198,5 @@ public class Tablero {
                 return new Point[]{};
         }
     }
-    
+
 }

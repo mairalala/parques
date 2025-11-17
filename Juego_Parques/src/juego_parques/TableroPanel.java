@@ -13,7 +13,7 @@ public class TableroPanel extends JPanel {
     private Ficha fichaActiva = null;
     private int dado1 = 1;
     private int dado2 = 1;
-    private int margenIzquierdo = 0;
+    private int margenIzquierdo = 750;
 
     public void setMargenIzquierdo(int margen) {
         this.margenIzquierdo = margen;
@@ -160,16 +160,21 @@ public class TableroPanel extends JPanel {
                 g2d.fillOval(x + 10, y + 10, dot, dot);
                 g2d.fillOval(x + size - 20, y + 10, dot, dot);
                 g2d.fillOval(x + 10, y + size - 20, dot, dot);
+                g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
 
                 break;
 
             case 5:
-
+                // Arriba izquierda
                 g2d.fillOval(x + 10, y + 10, dot, dot);
+                // Arriba derecha
                 g2d.fillOval(x + size - 20, y + 10, dot, dot);
+                // Centro
                 g2d.fillOval(cx - dot / 2, cy - dot / 2, dot, dot);
+                // Abajo izquierda
                 g2d.fillOval(x + 10, y + size - 20, dot, dot);
-
+                // Abajo derecha (EL QUE FALTABA)
+                g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
                 break;
 
             case 6:
@@ -187,14 +192,25 @@ public class TableroPanel extends JPanel {
         //break;
 
     }
+
     private void dibujarBaseConFichas(Graphics2D g2d, int offsetX, int offsetY, String color, Point inicio) {
         Color baseColor;
         switch (color) {
-            case "Rojo": baseColor = new Color(255, 0, 0, 100); break;
-            case "Amarillo": baseColor = new Color(255, 255, 0, 100); break;
-            case "Verde": baseColor = new Color(0, 255, 0, 100); break;
-            case "Azul": baseColor = new Color(0, 0, 255, 100); break;
-            default: baseColor = new Color(200, 200, 200, 100); break;
+            case "Rojo":
+                baseColor = new Color(255, 0, 0, 100);
+                break;
+            case "Amarillo":
+                baseColor = new Color(255, 255, 0, 100);
+                break;
+            case "Verde":
+                baseColor = new Color(0, 255, 0, 100);
+                break;
+            case "Azul":
+                baseColor = new Color(0, 0, 255, 100);
+                break;
+            default:
+                baseColor = new Color(200, 200, 200, 100);
+                break;
         }
 
         int baseSize = 7 * tamCasilla;
@@ -208,12 +224,16 @@ public class TableroPanel extends JPanel {
         int padding = (baseSize - 2 * fichaSize) / 3;
 
         for (Jugador jugador : jugadores) {
-            if (!jugador.getColorStr().equals(color)) continue;
+            if (!jugador.getColorStr().equals(color)) {
+                continue;
+            }
 
             List<Ficha> fichas = jugador.getFichas();
             for (int i = 0; i < fichas.size(); i++) {
                 Ficha f = fichas.get(i);
-                if (!f.isEnBase()) continue;
+                if (!f.isEnBase()) {
+                    continue;
+                }
 
                 int row = i / 2;
                 int col = i % 2;
@@ -236,7 +256,9 @@ public class TableroPanel extends JPanel {
     }
 
     private Color adaptarColor(Color colorOriginal) {
-        if (!modoOscuro) return colorOriginal;
+        if (!modoOscuro) {
+            return colorOriginal;
+        }
         int r = Math.max(0, colorOriginal.getRed() - 50);
         int g = Math.max(0, colorOriginal.getGreen() - 50);
         int b = Math.max(0, colorOriginal.getBlue() - 50);
@@ -247,6 +269,3 @@ public class TableroPanel extends JPanel {
         repaint();
     }
 }
-
-
-

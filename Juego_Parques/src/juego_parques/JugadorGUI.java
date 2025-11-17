@@ -10,7 +10,7 @@ public class JugadorGUI extends JPanel {
     private Jugador[] jugadores;
     private Tablero tablero;
     private TableroPanel panelTablero;
-    private PanelInfoLateral panelInfo;
+//    private PanelInfoLateral panelInfo;
     private int turnoActual = 0;
     private Random random = new Random();
     private int paresConsecutivos = 0;
@@ -22,13 +22,13 @@ public class JugadorGUI extends JPanel {
     private Set<String> preguntasUsadas = new HashSet<>();
 
     public JugadorGUI(Jugador[] jugadores, Tablero tablero, TableroPanel panelTablero,
-                      ReproductorSonido reproductor, PanelInfoLateral panelInfo,
-                      String categoriaSeleccionada) {
+            ReproductorSonido reproductor, PanelInfoLateral panelInfo,
+            String categoriaSeleccionada) {
         this.jugadores = jugadores;
         this.tablero = tablero;
         this.panelTablero = panelTablero;
         this.reproductor = reproductor;
-        this.panelInfo = panelInfo;
+//        this.panelInfo = panelInfo;
         this.categoriaSeleccionada = categoriaSeleccionada != null ? categoriaSeleccionada : "default";
 
         setLayout(new FlowLayout(FlowLayout.CENTER, 20, 10));
@@ -68,16 +68,15 @@ public class JugadorGUI extends JPanel {
             intentosIniciales++;
         }
 
-        panelInfo.actualizarInfo(jugador, dado1, dado2, intentosIniciales,
-                jugador.getFichasEnMeta(), "Turno activo");
-
+//        panelInfo.actualizarInfo(jugador, dado1, dado2, intentosIniciales,
+//                jugador.getFichasEnMeta(), "Turno activo");
         if (jugador.todasEnBase() && !esPar) {
             if (intentosIniciales >= 3) {
                 siguienteTurno("No sacó par en 3 intentos. Pierde el turno.");
                 return;
             } else {
-                panelInfo.actualizarInfo(jugador, dado1, dado2, intentosIniciales,
-                        jugador.getFichasEnMeta(), "Intenta nuevamente (" + intentosIniciales + "/3)");
+//                panelInfo.actualizarInfo(jugador, dado1, dado2, intentosIniciales,
+//                        jugador.getFichasEnMeta(), "Intenta nuevamente (" + intentosIniciales + "/3)");
                 return;
             }
         }
@@ -103,8 +102,8 @@ public class JugadorGUI extends JPanel {
         if (!esPar) {
             siguienteTurno("Turno terminado");
         } else {
-            panelInfo.actualizarInfo(jugador, dado1, dado2, intentosIniciales,
-                    jugador.getFichasEnMeta(), "Sacó par! Puede volver a lanzar.");
+//            panelInfo.actualizarInfo(jugador, dado1, dado2, intentosIniciales,
+//                    jugador.getFichasEnMeta(), "Sacó par! Puede volver a lanzar.");
         }
     }
 
@@ -117,37 +116,28 @@ public class JugadorGUI extends JPanel {
 
         if ("pregunta".equals(casillaDestino.getTipo()) && !casillaDestino.isPreguntaRespondida()) {
 
-            String[] dificultades = {"Fácil", "Medio", "Avanzado"};
-            String dificultad = dificultades[random.nextInt(dificultades.length)];
-
-            generarCasillasPregunta pregunta;
-            int intentos = 0;
-            do {
-                pregunta = new generarCasillasPregunta(categoriaSeleccionada, dificultad);
-                intentos++;
-            } while (preguntasUsadas.contains(pregunta.getPregunta()) && intentos < 10);
-
-            preguntasUsadas.add(pregunta.getPregunta());
-
-            boolean correcta = pregunta.hacerPregunta();
-
-            if (correcta) {
-                ficha.mover(pasos, tablero);
-                JOptionPane.showMessageDialog(null, "¡Correcto! Avanzas completo.");
-            } else {
-                int pasosMitad = pasos / 2;
-                if (pasosMitad < 1) pasosMitad = -3;
-                ficha.mover(pasosMitad, tablero);
-                JOptionPane.showMessageDialog(null, "Incorrecto. Avanzas solo " + pasosMitad + " casillas.");
-            }
-            casillaDestino.setPreguntaRespondida(true);
+            // Pregunta, colisiones, correcto/incorrecto...
+            // (todo esto lo dejas igual)
         } else {
+
+            // Movimiento normal
             ficha.mover(pasos, tablero);
+
+            // ==============================
+            // 🔥 VERIFICAR ENTRADA AL PASILLO
+            // ==============================
+            if (ficha.puedeEntrarPasillo(tablero)) {
+                ficha.setIndiceCasilla(-1);
+                ficha.setIndiceCasillaPasillo(0);
+
+                ArrayList<Casilla> pasillo = tablero.getPasillos().get(ficha.getColorStr());
+                if (pasillo != null && !pasillo.isEmpty()) {
+                    ficha.setPosicion(pasillo.get(0).getPosicion());
+                }
+            }
         }
 
         panelTablero.setFichaActiva(ficha);
-        panelInfo.actualizarInfo(jugador, 0, 0, intentosIniciales,
-                jugador.getFichasEnMeta(), "Ficha " + ficha.getNumero() + " avanzó");
     }
 
     private void elegirFichaParaSacar(Jugador jugador) {
@@ -178,8 +168,8 @@ public class JugadorGUI extends JPanel {
             panelTablero.setFichaActiva(fichaSeleccionada);
             panelTablero.actualizar();
 
-            panelInfo.actualizarInfo(jugador, 0, 0, intentosIniciales,
-                    jugador.getFichasEnMeta(), "Ficha " + num + " salió de la base");
+//            panelInfo.actualizarInfo(jugador, 0, 0, intentosIniciales,
+//                    jugador.getFichasEnMeta(), "Ficha " + num + " salió de la base");
         }
     }
 
@@ -204,10 +194,15 @@ public class JugadorGUI extends JPanel {
     }
 
     private void siguienteTurno(String mensaje) {
+
         paresConsecutivos = 0;
         intentosIniciales = 0;
 
         turnoActual = (turnoActual + 1) % jugadores.length;
+
+        JuegoParquesGUI ventana = (JuegoParquesGUI) SwingUtilities.getWindowAncestor(this);
+
+        ventana.mostrarMensaje("Turno de " + jugadores[turnoActual].getColorStr());
 
         fichaSeleccionada = null;
         panelTablero.setFichaActiva(null);
@@ -218,8 +213,8 @@ public class JugadorGUI extends JPanel {
 
     private void actualizarPanelInfo() {
         Jugador jugador = jugadores[turnoActual];
-        panelInfo.actualizarInfo(jugador, 0, 0, intentosIniciales,
-                jugador.getFichasEnMeta(), "Turno activo");
+//        panelInfo.actualizarInfo(jugador, 0, 0, intentosIniciales,
+//                jugador.getFichasEnMeta(), "Turno activo");
 
         JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         if (parentFrame instanceof JuegoParquesGUI) {
@@ -229,8 +224,8 @@ public class JugadorGUI extends JPanel {
 
     private void actualizarPanelInfo(String mensaje) {
         Jugador jugador = jugadores[turnoActual];
-        panelInfo.actualizarInfo(jugador, 0, 0, intentosIniciales,
-                jugador.getFichasEnMeta(), mensaje);
+//        panelInfo.actualizarInfo(jugador, 0, 0, intentosIniciales,
+//                jugador.getFichasEnMeta(), mensaje);
 
         JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         if (parentFrame instanceof JuegoParquesGUI) {
@@ -252,5 +247,6 @@ public class JugadorGUI extends JPanel {
     public String getCategoriaSeleccionada() {
         return categoriaSeleccionada;
     }
+
     //holi
 }

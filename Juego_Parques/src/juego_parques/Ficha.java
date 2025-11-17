@@ -105,7 +105,7 @@ public class Ficha {
     }
 
     public boolean estaEnPasillo() {
-        return indiceCasilla == -1;
+        return indiceCasillaPasillo >= 0;
     }
 
     public boolean haDadoVuelta() {
@@ -117,68 +117,68 @@ public class Ficha {
     }
 
     public boolean puedeEntrarPasillo(Tablero tablero) {
-        if (enBase || enMeta) {
-            return false;
-        }
-
-        // Solo puede entrar si ya dio la vuelta completa
-        if (!haDadoVuelta) return false;
-
+        int idx = this.indiceCasilla;
         switch (colorStr) {
             case "Rojo":
-                return indiceCasilla == 62;
+                return idx == 55;
             case "Amarillo":
-                return indiceCasilla == 16;
+                return idx == 4;
             case "Verde":
-                return indiceCasilla == 28;
+                return idx == 21;
             case "Azul":
-                return indiceCasilla == 50;
+                return idx == 38;
             default:
                 return false;
         }
     }
 
     public void mover(int pasos, Tablero tablero) {
-        int totalCasillas = tablero.getCasillas().size();
+    int totalCasillas = tablero.getCasillas().size();
 
-        for (int i = 0; i < pasos; i++) {
-            if (!enBase && !enMeta) {
-                // Detectar si completó la vuelta
-                if (indiceCasilla + 1 >= totalCasillas) {
-                    indiceCasilla = 0;
-                    haDadoVuelta = true;
-                } else {
-                    indiceCasilla++;
-                }
+    for (int i = 0; i < pasos; i++) {
 
-                // Actualizar posición normal
-                posicion = tablero.obtenerCasilla(indiceCasilla);
+        // --- PASILLO ---
+        if (estaEnPasillo()) {
+            ArrayList<Casilla> pasillo = tablero.getPasillos().get(colorStr);
+            if (pasillo == null || pasillo.isEmpty()) return;
 
-                // Verificar entrada al pasillo
-                if (puedeEntrarPasillo(tablero)) {
-                    indiceCasilla = -1;
-                    indiceCasillaPasillo = 0;
-                    ArrayList<Casilla> pasillo = tablero.getPasillos().get(colorStr);
-                    if (pasillo != null && !pasillo.isEmpty()) {
-                        posicion = pasillo.get(0).getPosicion();
-                    }
-                }
+            int prox = indiceCasillaPasillo + 1;
 
-            } else if (estaEnPasillo()) {
-                ArrayList<Casilla> pasillo = tablero.getPasillos().get(colorStr);
-                if (pasillo == null || pasillo.isEmpty()) return;
-
-                int prox = indiceCasillaPasillo + 1;
-                if (prox < pasillo.size()) {
-                    indiceCasillaPasillo = prox;
-                    posicion = pasillo.get(prox).getPosicion();
-                } else {
-                    enMeta = true;
-                    posicion = tablero.getMetaPorColor(colorStr);
-                }
+            if (prox < pasillo.size()) {
+                indiceCasillaPasillo = prox;
+                posicion = pasillo.get(prox).getPosicion();
+            } else {
+                enMeta = true;
+                posicion = tablero.getMetaPorColor(colorStr);
             }
+            continue;
         }
+
+        // --- RUTA NORMAL ---
+        // 1. verificar si LA SIGUIENTE casilla es la entrada al pasillo
+        int siguiente = (indiceCasilla + 1) % totalCasillas;
+
+        if (siguiente == 55 && colorStr.equals("Rojo") ||
+            siguiente == 4 && colorStr.equals("Amarillo") ||
+            siguiente == 21 && colorStr.equals("Verde") ||
+            siguiente == 38 && colorStr.equals("Azul")) {
+
+            // ENTRAR AL PASILLO
+            indiceCasilla = -1;
+            indiceCasillaPasillo = 0;
+
+            ArrayList<Casilla> pasillo = tablero.getPasillos().get(colorStr);
+            posicion = pasillo.get(0).getPosicion();
+            continue;
+        }
+
+        // 2. si NO entra al pasillo, avanzar normal
+        indiceCasilla = siguiente;
+        posicion = tablero.obtenerCasilla(indiceCasilla);
     }
+}
+
+
 
     public boolean haLlegadoAMeta() {
         return enMeta;

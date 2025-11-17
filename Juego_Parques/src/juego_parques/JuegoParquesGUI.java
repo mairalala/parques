@@ -28,7 +28,11 @@ public class JuegoParquesGUI extends JFrame {
         inicializarBase(cantidadJugadores);
         crearJugadoresPorDefecto(cantidadJugadores, nombres, colores);
         terminarInicializacion();
-        generarCasillasPregunta(); 
+        generarCasillasPregunta();
+    }
+
+    public void mostrarMensaje(String texto) {
+        new MensajeEmergente(this, texto);
     }
 
     private void inicializarBase(int cantidadJugadores) {
@@ -64,13 +68,20 @@ public class JuegoParquesGUI extends JFrame {
     }
 
     private Color obtenerColor(String c) {
-        if (c == null) return Color.WHITE;
+        if (c == null) {
+            return Color.WHITE;
+        }
         switch (c.toUpperCase()) {
-            case "ROJO": return Color.RED;
-            case "VERDE": return Color.GREEN;
-            case "AZUL": return Color.BLUE;
-            case "AMARILLO": return Color.YELLOW;
-            default: return Color.WHITE;
+            case "ROJO":
+                return Color.RED;
+            case "VERDE":
+                return Color.GREEN;
+            case "AZUL":
+                return Color.BLUE;
+            case "AMARILLO":
+                return Color.YELLOW;
+            default:
+                return Color.WHITE;
         }
     }
 
@@ -204,6 +215,8 @@ public class JuegoParquesGUI extends JFrame {
     }
 
     public void actualizarTablero() {
-        if (panelTablero != null) panelTablero.actualizar();
+        if (panelTablero != null) {
+            panelTablero.actualizar();
+        }
     }
 }
