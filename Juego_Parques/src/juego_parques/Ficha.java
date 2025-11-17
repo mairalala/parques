@@ -46,7 +46,7 @@ public class Ficha {
     public void volverABase() {
         enBase = true;
         enMeta = false;
-        indiceCasilla = 0;
+        indiceCasilla = -1;
         indiceCasillaPasillo = -1;
         haDadoVuelta = false; // Reinicia vuelta
     }

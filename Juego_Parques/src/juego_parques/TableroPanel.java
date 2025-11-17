@@ -6,14 +6,23 @@ import java.util.List;
 
 public class TableroPanel extends JPanel {
 
+    // =================================================================
+    // Variables para almacenar las imágenes de las bases
+    // =================================================================
+    private Image imagenRojo;
+    private Image imagenAmarillo;
+    private Image imagenVerde;
+    private Image imagenAzul;
+    // =================================================================
+    
     private Jugador[] jugadores;
     private Tablero tablero;
-    private int tamCasilla = 50;
+    private int tamCasilla = 40;
     private boolean modoOscuro;
     private Ficha fichaActiva = null;
     private int dado1 = 1;
     private int dado2 = 1;
-    private int margenIzquierdo = 750;
+    private int margenIzquierdo = 700;
 
     public void setMargenIzquierdo(int margen) {
         this.margenIzquierdo = margen;
@@ -25,12 +34,38 @@ public class TableroPanel extends JPanel {
         this.jugadores = jugadores;
         this.modoOscuro = modoOscuro;
 
+        // Cargar las imágenes en el constructor
+        cargarImagenesBase();
+
         int tableroSize = 20 * tamCasilla;
         setPreferredSize(new Dimension(tableroSize, tableroSize));
         setMinimumSize(new Dimension(tableroSize, tableroSize));
         setMaximumSize(new Dimension(tableroSize, tableroSize));
         setOpaque(false);
     }
+    
+    // =================================================================
+    // MODIFICACIÓN CRÍTICA: Método para cargar las imágenes desde el Classpath
+    // =================================================================
+    private void cargarImagenesBase() {
+        try {
+            // **IMPORTANTE:** El path debe reflejar la ubicación de los archivos.
+            // Si las imágenes están DENTRO del paquete 'juego_parques', usa el path completo:
+            imagenRojo = new ImageIcon(getClass().getResource("/juego_parques/fondo ingles.jpg")).getImage();
+            imagenAmarillo = new ImageIcon(getClass().getResource("/juego_parques/fondo matematocas.jpg")).getImage();
+            imagenVerde = new ImageIcon(getClass().getResource("/juego_parques/fondo programacion.jpg")).getImage();
+            imagenAzul = new ImageIcon(getClass().getResource("/juego_parques/fondo historia de la programacion_1.jpg")).getImage();
+            
+            // Si están en una carpeta 'resources' en la raíz del proyecto, el path sería:
+            // imagenRojo = new ImageIcon(getClass().getResource("/resources/base_roja.png")).getImage();
+            
+        } catch (Exception e) {
+            System.err.println("Error al cargar una o más imágenes de las bases. Se usarán colores de respaldo.");
+            // Si deseas ver por qué falla la ruta, descomenta la siguiente línea:
+            // e.printStackTrace(); 
+        }
+    }
+    // =================================================================
 
     public void setDados(int d1, int d2) {
         this.dado1 = d1;
@@ -85,7 +120,7 @@ public class TableroPanel extends JPanel {
             }
         }
 
-        // Dibujar bases
+        // Dibujar bases (llama al método modificado)
         for (String color : new String[]{"Rojo", "Amarillo", "Verde", "Azul"}) {
             Point inicio = tablero.getPosicionesBase(color)[0];
             dibujarBaseConFichas(g2d, offsetX, offsetY, color, inicio);
@@ -173,7 +208,7 @@ public class TableroPanel extends JPanel {
                 g2d.fillOval(cx - dot / 2, cy - dot / 2, dot, dot);
                 // Abajo izquierda
                 g2d.fillOval(x + 10, y + size - 20, dot, dot);
-                // Abajo derecha (EL QUE FALTABA)
+                // Abajo derecha
                 g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
                 break;
 
@@ -187,29 +222,35 @@ public class TableroPanel extends JPanel {
                 g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
 
                 break;
-
         }
-        //break;
-
     }
 
+    // Lógica para dibujar la base con imagen o color de respaldo (código sin cambios aquí)
     private void dibujarBaseConFichas(Graphics2D g2d, int offsetX, int offsetY, String color, Point inicio) {
-        Color baseColor;
+        
+        Image imagenBase = null; 
+        Color fallbackColor; 
+
+        // 1. Asignar la imagen y definir un color de respaldo con transparencia
         switch (color) {
             case "Rojo":
-                baseColor = new Color(255, 0, 0, 100);
+                imagenBase = imagenRojo;
+                fallbackColor = new Color(255, 0, 0, 100);
                 break;
             case "Amarillo":
-                baseColor = new Color(255, 255, 0, 100);
+                imagenBase = imagenAmarillo;
+                fallbackColor = new Color(255, 255, 0, 100);
                 break;
             case "Verde":
-                baseColor = new Color(0, 255, 0, 100);
+                imagenBase = imagenVerde;
+                fallbackColor = new Color(0, 255, 0, 100);
                 break;
             case "Azul":
-                baseColor = new Color(0, 0, 255, 100);
+                imagenBase = imagenAzul;
+                fallbackColor = new Color(0, 0, 255, 100);
                 break;
             default:
-                baseColor = new Color(200, 200, 200, 100);
+                fallbackColor = new Color(200, 200, 200, 100);
                 break;
         }
 
@@ -217,9 +258,17 @@ public class TableroPanel extends JPanel {
         int x = offsetX + inicio.x * tamCasilla - (baseSize - tamCasilla) / 2;
         int y = offsetY + inicio.y * tamCasilla - (baseSize - tamCasilla) / 2;
 
-        g2d.setColor(baseColor);
-        g2d.fillRect(x, y, baseSize, baseSize);
+        // 2. Dibujar: Si la imagen está cargada, dibujar la imagen; si no, dibujar el color.
+        if (imagenBase != null) {
+            // Dibuja la imagen escalada para que ocupe todo el espacio de la base
+            g2d.drawImage(imagenBase, x, y, baseSize, baseSize, this);
+        } else {
+            // Dibuja el color de respaldo con la transparencia definida (comportamiento original)
+            g2d.setColor(fallbackColor);
+            g2d.fillRect(x, y, baseSize, baseSize);
+        }
 
+        // Dibujar fichas dentro de la base (código original sin cambios)
         int fichaSize = tamCasilla - 10;
         int padding = (baseSize - 2 * fichaSize) / 3;
 

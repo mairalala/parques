@@ -216,4 +216,25 @@ public class Tablero {
         }
     }
 
+    public boolean esSeguro(int indice) {
+        if (indice < 0 || indice >= ruta.size()) {
+            return false;
+        }
+        String tipo = ruta.get(indice).getTipo();
+        return "seguro".equals(tipo) || "salida".equals(tipo);
+    }
+
+    /**
+     * Verifica si una casilla es de tipo "salida".
+     *
+     * @param indice El índice de la casilla en la ruta principal.
+     * @return true si es una casilla de salida.
+     */
+    public boolean esSalida(int indice) {
+        if (indice < 0 || indice >= ruta.size()) {
+            return false;
+        }
+        return "salida".equals(ruta.get(indice).getTipo());
+    }
+
 }
