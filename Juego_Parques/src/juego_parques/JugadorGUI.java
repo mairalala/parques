@@ -26,7 +26,7 @@ public class JugadorGUI extends JPanel {
     JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
 
     // Ruta de la imagen (colócala en la carpeta "resources" o dentro del proyecto)
-    ImageIcon imagen = new ImageIcon("src/juego_parques/inforcion.jpg");
+    ImageIcon imagen = new ImageIcon("src/juego_parques/informacion.jpg");
 
     // Ajustar tamaño si la imagen es muy grande
     Image img = imagen.getImage().getScaledInstance(400, 300, Image.SCALE_SMOOTH);
