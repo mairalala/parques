@@ -42,7 +42,7 @@ public class JugadorGUI extends JPanel {
     }
 
     public JugadorGUI(Jugador[] jugadores, Tablero tablero, TableroPanel panelTablero,
-            ReproductorSonido reproductor, PanelInfoLateral panelInfo,
+            ReproductorSonido reproductor,
             String categoriaSeleccionada) {
         this.jugadores = jugadores;
         this.tablero = tablero;

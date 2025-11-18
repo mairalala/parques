@@ -13,7 +13,7 @@ public class JuegoParquesGUI extends JFrame {
     private Jugador[] jugadores;
     private JugadorGUI controladorTurnos;
     private ReproductorSonido reproductor;
-    private PanelInfoLateral panelInfo;
+
     private PanelPausa panelPausa;
     private boolean modoOscuro;
     private FondoPanel fondo;
@@ -31,7 +31,6 @@ public class JuegoParquesGUI extends JFrame {
         generarCasillasPregunta();
     }
     JButton botonInfo = new JButton("Información");
-
 
     public void mostrarMensaje(String texto) {
         new MensajeEmergente(this, texto);
@@ -91,10 +90,8 @@ public class JuegoParquesGUI extends JFrame {
         panelTablero = new TableroPanel(tablero, jugadores, modoOscuro);
         fondo.add(panelTablero, BorderLayout.CENTER);
 
-        panelInfo = new PanelInfoLateral(modoOscuro);
-        fondo.add(panelInfo, BorderLayout.EAST);
+        controladorTurnos = new JugadorGUI(jugadores, tablero, panelTablero, reproductor, categoriaPreguntas);
 
-        controladorTurnos = new JugadorGUI(jugadores, tablero, panelTablero, reproductor, panelInfo, categoriaPreguntas);
         fondo.add(controladorTurnos, BorderLayout.SOUTH);
 
         panelPausa = new PanelPausa(this);
@@ -174,10 +171,7 @@ public class JuegoParquesGUI extends JFrame {
             panelTablero.setModoOscuro(modo);
             panelTablero.repaint();
         }
-        if (panelInfo != null) {
-            panelInfo.setModoOscuro(modo);
-            panelInfo.repaint();
-        }
+
         if (barraSuperior != null) {
             barraSuperior.setBackground(modo ? Color.DARK_GRAY : new Color(180, 0, 0));
             barraSuperior.repaint();

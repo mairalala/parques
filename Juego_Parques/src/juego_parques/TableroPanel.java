@@ -6,15 +6,11 @@ import java.util.List;
 
 public class TableroPanel extends JPanel {
 
-    // =================================================================
-    // Variables para almacenar las imágenes de las bases
-    // =================================================================
     private Image imagenRojo;
     private Image imagenAmarillo;
     private Image imagenVerde;
     private Image imagenAzul;
-    // =================================================================
-    
+
     private Jugador[] jugadores;
     private Tablero tablero;
     private int tamCasilla = 40;
@@ -22,7 +18,7 @@ public class TableroPanel extends JPanel {
     private Ficha fichaActiva = null;
     private int dado1 = 1;
     private int dado2 = 1;
-    private int margenIzquierdo = 700;
+    private int margenIzquierdo = 750; // margen del tablero desde la izquierda
 
     public void setMargenIzquierdo(int margen) {
         this.margenIzquierdo = margen;
@@ -34,38 +30,25 @@ public class TableroPanel extends JPanel {
         this.jugadores = jugadores;
         this.modoOscuro = modoOscuro;
 
-        // Cargar las imágenes en el constructor
         cargarImagenesBase();
 
         int tableroSize = 20 * tamCasilla;
-        setPreferredSize(new Dimension(tableroSize, tableroSize));
-        setMinimumSize(new Dimension(tableroSize, tableroSize));
-        setMaximumSize(new Dimension(tableroSize, tableroSize));
+        setPreferredSize(new Dimension(tableroSize + 200, tableroSize)); // espacio extra para info
+        setMinimumSize(new Dimension(tableroSize + 200, tableroSize));
+        setMaximumSize(new Dimension(tableroSize + 200, tableroSize));
         setOpaque(false);
     }
-    
-    // =================================================================
-    // MODIFICACIÓN CRÍTICA: Método para cargar las imágenes desde el Classpath
-    // =================================================================
+
     private void cargarImagenesBase() {
         try {
-            // **IMPORTANTE:** El path debe reflejar la ubicación de los archivos.
-            // Si las imágenes están DENTRO del paquete 'juego_parques', usa el path completo:
-            imagenRojo = new ImageIcon(getClass().getResource("/juego_parques/fondo ingles.jpg")).getImage();
-            imagenAmarillo = new ImageIcon(getClass().getResource("/juego_parques/fondo matematocas.jpg")).getImage();
-            imagenVerde = new ImageIcon(getClass().getResource("/juego_parques/fondo programacion.jpg")).getImage();
-            imagenAzul = new ImageIcon(getClass().getResource("/juego_parques/fondo historia de la programacion_1.jpg")).getImage();
-            
-            // Si están en una carpeta 'resources' en la raíz del proyecto, el path sería:
-            // imagenRojo = new ImageIcon(getClass().getResource("/resources/base_roja.png")).getImage();
-            
+            imagenRojo = new ImageIcon(getClass().getResource("/juego_parques/ingles.jpg")).getImage();
+            imagenAmarillo = new ImageIcon(getClass().getResource("/juego_parques/matematicas.jpg")).getImage();
+            imagenVerde = new ImageIcon(getClass().getResource("/juego_parques/programacion.jpg")).getImage();
+            imagenAzul = new ImageIcon(getClass().getResource("/juego_parques/computacion.jpg")).getImage();
         } catch (Exception e) {
-            System.err.println("Error al cargar una o más imágenes de las bases. Se usarán colores de respaldo.");
-            // Si deseas ver por qué falla la ruta, descomenta la siguiente línea:
-            // e.printStackTrace(); 
+            System.err.println("Error al cargar imágenes de las bases. Se usarán colores de respaldo.");
         }
     }
-    // =================================================================
 
     public void setDados(int d1, int d2) {
         this.dado1 = d1;
@@ -82,15 +65,16 @@ public class TableroPanel extends JPanel {
         this.fichaActiva = ficha;
     }
 
+    @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
         int tableroSize = 20 * tamCasilla;
-        int offsetX = Math.abs(margenIzquierdo);
+        int offsetX = margenIzquierdo;
         int offsetY = (getHeight() - tableroSize) / 2;
 
-        // Dibujar casillas
+        // --- Dibujar casillas ---
         for (Casilla c : tablero.getCasillas()) {
             Point p = c.getPosicion();
             int x = offsetX + p.x * tamCasilla;
@@ -106,7 +90,7 @@ public class TableroPanel extends JPanel {
             g2d.drawRect(x, y, tamCasilla, tamCasilla);
         }
 
-        // Dibujar pasillos
+        // --- Dibujar pasillos ---
         for (List<Casilla> pasillo : tablero.getPasillos().values()) {
             for (Casilla c : pasillo) {
                 Point p = c.getPosicion();
@@ -120,13 +104,13 @@ public class TableroPanel extends JPanel {
             }
         }
 
-        // Dibujar bases (llama al método modificado)
+        // --- Dibujar bases ---
         for (String color : new String[]{"Rojo", "Amarillo", "Verde", "Azul"}) {
             Point inicio = tablero.getPosicionesBase(color)[0];
             dibujarBaseConFichas(g2d, offsetX, offsetY, color, inicio);
         }
 
-        // Dibujar fichas fuera de base
+        // --- Dibujar fichas fuera de base ---
         int fichaSize = tamCasilla - 10;
         for (Jugador jugador : jugadores) {
             for (Ficha ficha : jugador.getFichas()) {
@@ -159,9 +143,39 @@ public class TableroPanel extends JPanel {
             }
         }
 
-        // Dibujar dados
+        // --- Dibujar dados ---
         dibujarDado(g2d, offsetX - 80, getHeight() / 2 - 60, dado1);
         dibujarDado(g2d, offsetX - 80, getHeight() / 2 + 10, dado2);
+
+        // --- Dibujar información de jugadores ---
+        int infoX = offsetX + tableroSize + 20; // posición a la derecha del tablero
+        int infoY = offsetY; // inicio vertical
+
+        g2d.setColor(Color.BLACK);
+        g2d.setFont(new Font("Arial", Font.BOLD, 14));
+
+        for (Jugador jugador : jugadores) {
+            // Contar fichas en base y en juego
+            int enBase = 0;
+            int enJuego = 0;
+            for (Ficha f : jugador.getFichas()) {
+                if (f.isEnBase()) {
+                    enBase++;
+                } else {
+                    enJuego++;
+                }
+            }
+
+            // Crear el texto con los contadores
+            String texto = jugador.getColorStr() + ": " + enBase + " en base, " + enJuego + " en juego";
+
+            // Dibujar el texto
+            g2d.drawString(texto, infoX, infoY);
+
+            // Separación vertical entre jugadores
+            infoY += 25;
+        }
+
     }
 
     private void dibujarDado(Graphics2D g2d, int x, int y, int valor) {
@@ -225,11 +239,10 @@ public class TableroPanel extends JPanel {
         }
     }
 
-    // Lógica para dibujar la base con imagen o color de respaldo (código sin cambios aquí)
     private void dibujarBaseConFichas(Graphics2D g2d, int offsetX, int offsetY, String color, Point inicio) {
-        
-        Image imagenBase = null; 
-        Color fallbackColor; 
+
+        Image imagenBase = null;
+        Color fallbackColor;
 
         // 1. Asignar la imagen y definir un color de respaldo con transparencia
         switch (color) {
