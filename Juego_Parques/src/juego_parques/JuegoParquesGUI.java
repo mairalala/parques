@@ -5,23 +5,32 @@ import java.awt.*;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Ventana principal del juego Parqués GUI. Maneja tablero, jugadores, barra
+ * superior, panel de turnos, configuración y sonidos.
+ */
 public class JuegoParquesGUI extends JFrame {
 
-    private JPanel barraSuperior;
-    private Tablero tablero;
-    private TableroPanel panelTablero;
-    private Jugador[] jugadores;
-    private JugadorGUI controladorTurnos;
-    private ReproductorSonido reproductor;
+    private JPanel barraSuperior;           // Barra roja superior con botones cerrar/minimizar
+    private Tablero tablero;                // Lógica interna del tablero
+    private TableroPanel panelTablero;      // Panel gráfico donde se dibuja el tablero
+    private Jugador[] jugadores;            // Lista de jugadores
+    private JugadorGUI controladorTurnos;   // Panel de control: dados, turno, pausa, etc
+    private ReproductorSonido reproductor;  // Reproductor de sonidos
 
-    private PanelPausa panelPausa;
-    private boolean modoOscuro;
-    private FondoPanel fondo;
-    private String categoriaPreguntas;
-    private PanelConfiguracion panelConfiguracion;
+    private PanelPausa panelPausa;          // Panel superpuesto cuando el juego está en pausa
+    private boolean modoOscuro;             // Tema actual (claro u oscuro)
+    private FondoPanel fondo;               // Panel de fondo con imágenes de tema claro/oscuro
+    private String categoriaPreguntas;      // Categoría actual para casillas de preguntas
+    private PanelConfiguracion panelConfiguracion; // Panel de configuración del juego
 
-    public JuegoParquesGUI(int cantidadJugadores, ReproductorSonido reproductor, boolean modoOscuro,
-            String[] nombres, String[] colores) {
+    public JuegoParquesGUI(
+            int cantidadJugadores,
+            ReproductorSonido reproductor,
+            boolean modoOscuro,
+            String[] nombres,
+            String[] colores) {
+
         this.reproductor = reproductor;
         this.modoOscuro = modoOscuro;
 
@@ -30,6 +39,7 @@ public class JuegoParquesGUI extends JFrame {
         terminarInicializacion();
         generarCasillasPregunta();
     }
+
     JButton botonInfo = new JButton("Información");
 
     public void mostrarMensaje(String texto) {
@@ -41,8 +51,10 @@ public class JuegoParquesGUI extends JFrame {
         setLayout(new BorderLayout());
         crearBarraSuperior();
 
-        fondo = new FondoPanel("/juego_parques/imagenClaro.png",
-                "/juego_parques/imagenOscuro.JPG", modoOscuro);
+        fondo = new FondoPanel(
+                "/juego_parques/imagenClaro.png",
+                "/juego_parques/imagenOscuro.JPG",
+                modoOscuro);
         fondo.setLayout(new BorderLayout());
         add(fondo, BorderLayout.CENTER);
 
@@ -69,9 +81,8 @@ public class JuegoParquesGUI extends JFrame {
     }
 
     private Color obtenerColor(String c) {
-        if (c == null) {
-            return Color.WHITE;
-        }
+        if (c == null) return Color.WHITE;
+
         switch (c.toUpperCase()) {
             case "ROJO":
                 return Color.RED;
@@ -87,11 +98,23 @@ public class JuegoParquesGUI extends JFrame {
     }
 
     private void terminarInicializacion() {
+
         panelTablero = new TableroPanel(tablero, jugadores, modoOscuro);
-        fondo.add(panelTablero, BorderLayout.CENTER);
+
+        JPanel contenedorTablero = new JPanel();
+        contenedorTablero.setOpaque(false);
+        contenedorTablero.setLayout(null);
+
+        contenedorTablero.setPreferredSize(new Dimension(0, 0));
+
+        panelTablero.setBounds(0, 15, 1800, 800);
+
+        contenedorTablero.add(panelTablero);
+        fondo.add(contenedorTablero, BorderLayout.CENTER);
 
         controladorTurnos = new JugadorGUI(jugadores, tablero, panelTablero, reproductor, categoriaPreguntas);
-
+        controladorTurnos.setOpaque(false);
+        controladorTurnos.setPreferredSize(new Dimension(200, 80));
         fondo.add(controladorTurnos, BorderLayout.SOUTH);
 
         panelPausa = new PanelPausa(this);
@@ -128,10 +151,32 @@ public class JuegoParquesGUI extends JFrame {
         add(barraSuperior, BorderLayout.NORTH);
     }
 
+    /**
+     * 🔥 MODIFICACIÓN: AQUI SE APLICAN COLORES A LOS BOTONES
+     */
     private void estiloBoton(JButton btn) {
         btn.setFocusable(false);
         btn.setPreferredSize(new Dimension(45, 28));
         btn.setFont(new Font("Arial", Font.BOLD, 16));
+
+        // 🔹 Colores personalizados
+        btn.setBackground(new Color(225, 250, 195)); // Gris oscuro
+        btn.setForeground(Color.BLACK);
+
+        btn.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+
+        // 🔹 Efecto HOVER
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                btn.setBackground(new Color(90, 93, 95));
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                btn.setBackground(new Color(60, 63, 65));
+            }
+        });
     }
 
     public void setColorBarra(Color c) {

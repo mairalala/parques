@@ -5,16 +5,23 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
+/**
+ * Panel principal que controla la interacción del jugador con el juego: -
+ * Lanzar dados - Mover fichas - Sacar fichas - Mostrar información - Manejar
+ * turnos
+ */
 public class JugadorGUI extends JPanel {
 
     private Jugador[] jugadores;
     private Tablero tablero;
     private TableroPanel panelTablero;
-//    private PanelInfoLateral panelInfo;
+
     private int turnoActual = 0;
     private Random random = new Random();
+
     private int paresConsecutivos = 0;
     private int intentosIniciales = 0;
+
     private Ficha fichaSeleccionada;
     private ReproductorSonido reproductor;
 
@@ -24,10 +31,7 @@ public class JugadorGUI extends JPanel {
     private void mostrarInformacion() {
         JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
 
-        // Ruta de la imagen (colócala en la carpeta "resources" o dentro del proyecto)
         ImageIcon imagen = new ImageIcon("src/juego_parques/informacion.jpg");
-
-        // Ajustar tamaño si la imagen es muy grande
         Image img = imagen.getImage().getScaledInstance(400, 300, Image.SCALE_SMOOTH);
         ImageIcon imgEscalada = new ImageIcon(img);
 
@@ -44,29 +48,43 @@ public class JugadorGUI extends JPanel {
     public JugadorGUI(Jugador[] jugadores, Tablero tablero, TableroPanel panelTablero,
             ReproductorSonido reproductor,
             String categoriaSeleccionada) {
+
         this.jugadores = jugadores;
         this.tablero = tablero;
         this.panelTablero = panelTablero;
         this.reproductor = reproductor;
-//        this.panelInfo = panelInfo;
+
         this.categoriaSeleccionada = categoriaSeleccionada != null ? categoriaSeleccionada : "default";
 
-        setLayout(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        setLayout(new BorderLayout());
 
-        JButton botonLanzar = new JButton(" Lanzar Dados");
-        botonLanzar.setFont(new Font("Berlin Sans FB Demi", Font.BOLD, 18));
+        // ==========================================
+        // PANEL INFERIOR CON BOTONES HORIZONTALES
+        // ==========================================
+        JPanel panelBotones = new JPanel();
+        panelBotones.setLayout(new FlowLayout(FlowLayout.CENTER, 25, 10));
+        panelBotones.setOpaque(false);
+
+        panelBotones.setPreferredSize(new Dimension(1, 80));
+        panelBotones.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // BOTÓN LANZAR
+        JButton botonLanzar = new BotonModerno("Lanzar Dados");
         botonLanzar.addActionListener(e -> lanzarDados());
-        add(botonLanzar);
+        panelBotones.add(botonLanzar);
 
-        JButton botonPausa = new JButton(" Pausa");
-        botonPausa.setFont(new Font("Berlin Sans FB Demi", Font.BOLD, 18));
+        // BOTÓN PAUSA
+        JButton botonPausa = new BotonModerno("Pausa");
         botonPausa.addActionListener(e -> pausarJuego());
-        add(botonPausa);
+        panelBotones.add(botonPausa);
 
-        JButton botonInfo = new JButton("?");
-        botonInfo.setFont(new Font("Berlin Sans FB Demi", Font.BOLD, 18));
+        // BOTÓN INFORMACIÓN
+        JButton botonInfo = new BotonModerno("?");
         botonInfo.addActionListener(e -> mostrarInformacion());
-        add(botonInfo);
+        panelBotones.add(botonInfo);
+
+        // Agregar panel de botones abajo
+        add(panelBotones, BorderLayout.SOUTH);
 
         actualizarPanelInfo();
     }
@@ -79,11 +97,12 @@ public class JugadorGUI extends JPanel {
         int dado1 = valores[0];
         int dado2 = valores[1];
         int total = dado1 + dado2;
-        reproductor.lanzarDados();reproductor.lanzarDados();
+
+        reproductor.lanzarDados();
+        reproductor.lanzarDados();
 
         panelTablero.setDados(dado1, dado2);
         panelTablero.repaint();
-        
 
         boolean esPar = (dado1 == dado2);
 
@@ -95,15 +114,11 @@ public class JugadorGUI extends JPanel {
             intentosIniciales++;
         }
 
-//        panelInfo.actualizarInfo(jugador, dado1, dado2, intentosIniciales,
-//                jugador.getFichasEnMeta(), "Turno activo");
         if (jugador.todasEnBase() && !esPar) {
             if (intentosIniciales >= 3) {
-                siguienteTurno("No sacó par en 3 intentos. Pierde el turno.");
+                siguienteTurno("No sacó par en 3 intentos. Pierde turno.");
                 return;
             } else {
-//                panelInfo.actualizarInfo(jugador, dado1, dado2, intentosIniciales,
-//                        jugador.getFichasEnMeta(), "Intenta nuevamente (" + intentosIniciales + "/3)");
                 return;
             }
         }
@@ -128,31 +143,23 @@ public class JugadorGUI extends JPanel {
 
         if (!esPar) {
             siguienteTurno("Turno terminado");
-        } else {
-//            panelInfo.actualizarInfo(jugador, dado1, dado2, intentosIniciales,
-//                    jugador.getFichasEnMeta(), "Sacó par! Puede volver a lanzar.");
         }
     }
 
     private void moverFichaConPregunta(Ficha ficha, int pasos, Jugador jugador) {
         int destino = ficha.getIndiceCasilla() + pasos;
+
         if (destino >= tablero.getCasillas().size()) {
             destino = tablero.getCasillas().size() - 1;
         }
+
         Casilla casillaDestino = tablero.getCasillas().get(destino);
 
         if ("pregunta".equals(casillaDestino.getTipo()) && !casillaDestino.isPreguntaRespondida()) {
-
-            // Pregunta, colisiones, correcto/incorrecto...
-            // (todo esto lo dejas igual)
+            // lógica preguntas
         } else {
-
-            // Movimiento normal
             ficha.mover(pasos, tablero);
 
-            // ==============================
-            // 🔥 VERIFICAR ENTRADA AL PASILLO
-            // ==============================
             if (ficha.puedeEntrarPasillo(tablero)) {
                 ficha.setIndiceCasilla(-1);
                 ficha.setIndiceCasillaPasillo(0);
@@ -195,9 +202,6 @@ public class JugadorGUI extends JPanel {
             fichaSeleccionada = ficha;
             panelTablero.setFichaActiva(fichaSeleccionada);
             panelTablero.actualizar();
-
-//            panelInfo.actualizarInfo(jugador, 0, 0, intentosIniciales,
-//                    jugador.getFichasEnMeta(), "Ficha " + num + " salió de la base");
         }
     }
 
@@ -222,14 +226,12 @@ public class JugadorGUI extends JPanel {
     }
 
     private void siguienteTurno(String mensaje) {
-
         paresConsecutivos = 0;
         intentosIniciales = 0;
 
         turnoActual = (turnoActual + 1) % jugadores.length;
 
         JuegoParquesGUI ventana = (JuegoParquesGUI) SwingUtilities.getWindowAncestor(this);
-
         ventana.mostrarMensaje("Turno de " + jugadores[turnoActual].getColorStr());
 
         fichaSeleccionada = null;
@@ -241,8 +243,6 @@ public class JugadorGUI extends JPanel {
 
     private void actualizarPanelInfo() {
         Jugador jugador = jugadores[turnoActual];
-//        panelInfo.actualizarInfo(jugador, 0, 0, intentosIniciales,
-//                jugador.getFichasEnMeta(), "Turno activo");
 
         JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         if (parentFrame instanceof JuegoParquesGUI) {
@@ -252,8 +252,6 @@ public class JugadorGUI extends JPanel {
 
     private void actualizarPanelInfo(String mensaje) {
         Jugador jugador = jugadores[turnoActual];
-//        panelInfo.actualizarInfo(jugador, 0, 0, intentosIniciales,
-//                jugador.getFichasEnMeta(), mensaje);
 
         JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         if (parentFrame instanceof JuegoParquesGUI) {
@@ -276,5 +274,91 @@ public class JugadorGUI extends JPanel {
         return categoriaSeleccionada;
     }
 
-    //holi
+    // =====================================================
+    // BOTÓN MODERNO
+    // =====================================================
+    class BotonModerno extends JButton {
+
+        private Color colorNormal;
+        private Color colorHover;
+        private Color colorTexto = Color.BLACK;
+
+        public BotonModerno(String texto) {
+            super(texto);
+
+            // --------------------------------------------
+            // ASIGNAR COLOR SEGÚN EL NOMBRE DEL BOTÓN
+            // --------------------------------------------
+            switch (texto) {
+                case "Lanzar Dados":
+                    colorNormal = new Color(225, 250, 195);     // Verde
+                    colorHover = new Color(56, 142, 60);      // Verde oscuro
+                    break;
+
+                case "Pausa":
+                    colorNormal = new Color(255, 152, 0);     // Naranja
+                    colorHover = new Color(230, 120, 0);      // Naranja oscuro
+                    break;
+
+                case "?":
+                    colorNormal = new Color(33, 150, 243);    // Azul
+                    colorHover = new Color(25, 118, 210);     // Azul oscuro
+                    break;
+
+                default:
+                    colorNormal = new Color(30, 144, 255);    // Azul estándar
+                    colorHover = new Color(25, 120, 215);
+                    break;
+            }
+
+            setFont(new Font("Berlin Sans FB Demi", Font.BOLD, 18));
+            setForeground(colorTexto);
+            setBackground(colorNormal);
+            setFocusPainted(false);
+            setBorderPainted(false);
+            setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+            setBorder(new RoundedBorder(20));
+
+            // EFECTO HOVER
+            addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseEntered(java.awt.event.MouseEvent evt) {
+                    setBackground(colorHover);
+                }
+
+                @Override
+                public void mouseExited(java.awt.event.MouseEvent evt) {
+                    setBackground(colorNormal);
+                }
+            });
+        }
+
+        // BORDE REDONDEADO
+        private class RoundedBorder implements javax.swing.border.Border {
+
+            private int radio;
+
+            RoundedBorder(int radio) {
+                this.radio = radio;
+            }
+
+            @Override
+            public Insets getBorderInsets(Component c) {
+                return new Insets(10, 20, 10, 20);
+            }
+
+            @Override
+            public boolean isBorderOpaque() {
+                return false;
+            }
+
+            @Override
+            public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+                g.drawRoundRect(x, y, width - 1, height - 1, radio, radio);
+            }
+        }
+    }
+
+    
 }
