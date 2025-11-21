@@ -7,14 +7,14 @@ import java.util.ArrayList;
 public class Ficha {
 
     private String colorStr;
-    private Color color; // nuevo campo
+    private Color color;
     private int numero;
     private Point posicion;
-    private int indiceCasilla = 0; // índice en ruta principal
-    private int indiceCasillaPasillo = -1; // índice en pasillo (-1 si no está)
+    private int indiceCasilla = 0;
+    private int indiceCasillaPasillo = -1;
     private boolean enBase = true;
     private boolean enMeta = false;
-    private boolean haDadoVuelta = false; // NUEVO: controla si completó la vuelta
+    private boolean haDadoVuelta = false;
 
     public Ficha(String colorStr, int numero) {
         this.colorStr = colorStr;
@@ -35,7 +35,6 @@ public class Ficha {
                 break;
             default:
                 this.color = Color.GRAY;
-                break;
         }
     }
 
@@ -48,7 +47,7 @@ public class Ficha {
         enMeta = false;
         indiceCasilla = -1;
         indiceCasillaPasillo = -1;
-        haDadoVuelta = false; // Reinicia vuelta
+        haDadoVuelta = false;
     }
 
     public void sacarDeBase(int salidaIndex, Tablero tablero) {
@@ -116,72 +115,107 @@ public class Ficha {
         haDadoVuelta = false;
     }
 
-    public boolean puedeEntrarPasillo(Tablero tablero) {
-        int idx = this.indiceCasilla;
-        switch (colorStr) {
-            case "Rojo":
-                return idx == 55;
-            case "Amarillo":
-                return idx == 4;
-            case "Verde":
-                return idx == 21;
-            case "Azul":
-                return idx == 38;
-            default:
-                return false;
-        }
-    }
-
     public void mover(int pasos, Tablero tablero) {
 
-        int totalCasillas = tablero.getCasillas().size();
-        int entradaPasillo = tablero.getEntradaPasillo(colorStr);
-        int destinoFinal = (indiceCasilla + pasos) % totalCasillas;
+        int total = tablero.getCasillas().size();
+        int entrada = tablero.getEntradaPasillo(colorStr);
 
-        // -------------------------------------------------------------------
-        // 1. VERIFICAR SI EL MOVIMIENTO TERMINA EXACTAMENTE EN LA ENTRADA
-        // -------------------------------------------------------------------
-        if (!estaEnPasillo() && destinoFinal == entradaPasillo) {
-            // entrar directamente
-            indiceCasilla = -1;         // fuera del tablero
-            indiceCasillaPasillo = 0;   // primer casilla del pasillo
-            posicion = tablero.getPasillos().get(colorStr).get(0).getPosicion();
+        // -------------------------------------------------------------
+        // 1. SI ESTÁ EN PASILLO → mover dentro del pasillo
+        // -------------------------------------------------------------
+        if (estaEnPasillo()) {
+
+            ArrayList<Casilla> pasillo = tablero.getPasillos().get(colorStr);
+            int destino = indiceCasillaPasillo + pasos;
+
+            if (destino >= pasillo.size()) {
+                destino = pasillo.size() - 1; // meta
+                enMeta = true;
+                posicion = tablero.getMetaPorColor(colorStr);
+            } else {
+                posicion = pasillo.get(destino).getPosicion();
+            }
+
+            indiceCasillaPasillo = destino;
             return;
         }
 
-        // -------------------------------------------------------------------
-        // 2. SI YA ESTÁ EN PASILLO
-        // -------------------------------------------------------------------
-        if (estaEnPasillo()) {
-            ArrayList<Casilla> pasillo = tablero.getPasillos().get(colorStr);
+        // -------------------------------------------------------------
+        // 2. Movimiento normal por la ruta
+        // -------------------------------------------------------------
+        int destinoRuta = (indiceCasilla + pasos) % total;
 
-            int destinoPasillo = indiceCasillaPasillo + pasos;
+        // Marca si completó la vuelta (pasa por su salida)
+        if (!haDadoVuelta && destinoRuta < indiceCasilla) {
+            haDadoVuelta = true;
+        }
 
-            // Si excede la meta → NO SE MUEVE
-            if (destinoPasillo >= pasillo.size()) {
+        // -------------------------------------------------------------
+        // 3. SI YA DIO VUELTA → permitir entrada o paso al pasillo
+        // -------------------------------------------------------------
+        if (haDadoVuelta) {
+
+            // Caso A → cae EXACTO al seguro de entrada
+            if (destinoRuta == entrada) {
+
+                indiceCasilla = -1;
+                indiceCasillaPasillo = 0;
+
+                posicion = tablero.getPasillos()
+                        .get(colorStr)
+                        .get(0)
+                        .getPosicion();
+
                 return;
             }
 
-            indiceCasillaPasillo = destinoPasillo;
-            posicion = pasillo.get(destinoPasillo).getPosicion();
+            // Caso B → SE PASÓ del seguro y debe usar movimientos dentro del pasillo
+            if (indiceCasilla < entrada && destinoRuta > entrada) {
 
-            if (destinoPasillo == pasillo.size() - 1) {
-                enMeta = true;
-                posicion = tablero.getMetaPorColor(colorStr);
+                int pasosHastaEntrada = entrada - indiceCasilla;
+                int pasosRestantes = pasos - pasosHastaEntrada;
+
+                // entrar al pasillo
+                indiceCasilla = -1;
+                indiceCasillaPasillo = 0;
+
+                ArrayList<Casilla> pasillo = tablero.getPasillos().get(colorStr);
+
+                int destinoPasillo = pasosRestantes;
+
+                if (destinoPasillo >= pasillo.size()) {
+                    destinoPasillo = pasillo.size() - 1;
+                    enMeta = true;
+                    posicion = tablero.getMetaPorColor(colorStr);
+                } else {
+                    posicion = pasillo.get(destinoPasillo).getPosicion();
+                }
+
+                indiceCasillaPasillo = destinoPasillo;
+                return;
             }
-
-            return;
         }
 
-        // -------------------------------------------------------------------
-        // 3. MOVIMIENTO NORMAL, SIN ENTRAR AL PASILLO
-        // -------------------------------------------------------------------
-        indiceCasilla = destinoFinal;
+        // -------------------------------------------------------------
+        // 4. Movimiento normal si no entró al pasillo
+        // -------------------------------------------------------------
+        indiceCasilla = destinoRuta;
         posicion = tablero.obtenerCasilla(indiceCasilla);
+    }
+
+    public boolean puedeEntrarPasillo(Tablero tablero) {
+
+        if (!haDadoVuelta) {
+            return false; // no ha dado la vuelta completa
+        }
+
+        int seguro = tablero.getEntradaPasillo(colorStr);
+
+        // Solo puede entrar si está EXACTAMENTE sobre su seguro
+        return this.indiceCasilla == seguro;
     }
 
     public boolean haLlegadoAMeta() {
         return enMeta;
     }
-
 }

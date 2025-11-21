@@ -6,13 +6,14 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 /**
- * Ventana emergente personalizada que muestra un mensaje grande y centrado.
+ * Ventana emergente personalizada que muestra un mensaje grande y centrado en la parte inferior.
  * Es transparente y se cierra al presionar la tecla ESPACIO.
  */
 public class MensajeEmergente extends JDialog {
 
     /**
      * Constructor de la ventana emergente.
+     *
      * @param parent Ventana principal desde donde se invoca el mensaje.
      * @param texto  Texto que se quiere mostrar en pantalla.
      */
@@ -21,6 +22,11 @@ public class MensajeEmergente extends JDialog {
 
         setUndecorated(true); // Quita bordes y barra de título
         setBackground(new Color(0, 0, 0, 0)); // Fondo completamente transparente
+
+        // Tamaño del diálogo
+        int anchoDialogo = 700;
+        int altoDialogo = 250;
+        setSize(anchoDialogo, altoDialogo);
 
         // Etiqueta con el texto del mensaje
         JLabel label = new JLabel(texto, SwingConstants.CENTER);
@@ -35,8 +41,12 @@ public class MensajeEmergente extends JDialog {
 
         setContentPane(panel);  // Añade el panel al diálogo
 
-        setSize(700, 250); // Tamaño fijo de la ventana
-        setLocationRelativeTo(parent); // Centra respecto a la ventana padre
+        // ------------------- POSICIONAMIENTO ABAJO -------------------
+        // Obtenemos la posición de la ventana padre
+        Point parentLocation = parent.getLocationOnScreen();
+        int x = parentLocation.x + (parent.getWidth() - anchoDialogo) / 2; // centrado horizontal
+        int y = parentLocation.y + parent.getHeight() - altoDialogo - 10;   // 10 px desde la parte inferior
+        setLocation(x, y);
 
         // Listener para cerrar cuando se presione ESPACIO
         addKeyListener(new KeyAdapter() {

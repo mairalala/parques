@@ -187,7 +187,7 @@ public class MenuInicial extends JFrame {
         JLabel lbl = new JLabel("<html><center>"
                 + "CREADO POR<br><br>"
                 + "LAURA VANESSA RAMIREZ BAQUERO<br>"
-                + "DIEGO ALEJANDRO MONTOLLA<br>"
+                + "DIEGO ALEJANDRO MONTOYA<br>"
                 + "MIGUEL ANGEL RODRIGUEZ<br><br>"
                 + "© 2025<br></center></html>", SwingConstants.CENTER);
         lbl.setFont(new Font(FUENTE_BOTON, Font.PLAIN, 22));

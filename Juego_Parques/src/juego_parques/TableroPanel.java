@@ -18,7 +18,7 @@ public class TableroPanel extends JPanel {
     private Ficha fichaActiva = null;
     private int dado1 = 1;
     private int dado2 = 1;
-    private int margenIzquierdo = 750; // margen del tablero desde la izquierda
+    private int margenIzquierdo = 650; // margen del tablero desde la izquierda
 
     public void setMargenIzquierdo(int margen) {
         this.margenIzquierdo = margen;
@@ -33,7 +33,7 @@ public class TableroPanel extends JPanel {
         cargarImagenesBase();
 
         int tableroSize = 20 * tamCasilla;
-        setPreferredSize(new Dimension(tableroSize + 200, tableroSize)); // espacio extra para info
+        setPreferredSize(new Dimension(tableroSize + 200, tableroSize)); 
         setMinimumSize(new Dimension(tableroSize + 200, tableroSize));
         setMaximumSize(new Dimension(tableroSize + 200, tableroSize));
         setOpaque(false);
@@ -46,7 +46,7 @@ public class TableroPanel extends JPanel {
             imagenVerde = new ImageIcon(getClass().getResource("/juego_parques/programacion.jpg")).getImage();
             imagenAzul = new ImageIcon(getClass().getResource("/juego_parques/computacion.jpg")).getImage();
         } catch (Exception e) {
-            System.err.println("Error al cargar imágenes de las bases. Se usarán colores de respaldo.");
+            System.err.println("Error al cargar imágenes de las bases.");
         }
     }
 
@@ -65,7 +65,7 @@ public class TableroPanel extends JPanel {
         this.fichaActiva = ficha;
     }
 
-    @Override
+    
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
@@ -74,23 +74,52 @@ public class TableroPanel extends JPanel {
         int offsetX = margenIzquierdo;
         int offsetY = (getHeight() - tableroSize) / 2;
 
-        // --- Dibujar casillas ---
+        // --------------------------------------------------------------------
+        // 1. DIBUJAR CASILLAS
+        // --------------------------------------------------------------------
         for (Casilla c : tablero.getCasillas()) {
             Point p = c.getPosicion();
             int x = offsetX + p.x * tamCasilla;
             int y = offsetY + p.y * tamCasilla;
 
+            // ---------------------- NUEVO: COLOR DE PREGUNTA ------------------------
             if ("pregunta".equals(c.getTipo())) {
-                g2d.setColor(Color.DARK_GRAY);
+
+                if (!c.isPreguntaRespondida()) {
+                    g2d.setColor(Color.DARK_GRAY);
+                } else {
+                    g2d.setColor(new Color(120, 255, 120)); // Verde claro si ya respondida
+                }
+
             } else {
                 g2d.setColor(adaptarColor(c.getDrawColor()));
             }
+
             g2d.fillRect(x, y, tamCasilla, tamCasilla);
             g2d.setColor(Color.BLACK);
             g2d.drawRect(x, y, tamCasilla, tamCasilla);
+
+            // ---------- NUEVO: texto de categoría de pregunta ----------
+            if ("pregunta".equals(c.getTipo())) {
+                g2d.setColor(Color.WHITE);
+                g2d.setFont(new Font("Arial", Font.BOLD, 18));
+
+                String inicial = "?";
+                if (c.getCategoria() != null && !c.getCategoria().isEmpty()) {
+                    inicial = c.getCategoria().substring(0, 1).toUpperCase();
+                }
+
+                FontMetrics fm = g2d.getFontMetrics();
+                int tx = x + (tamCasilla - fm.stringWidth(inicial)) / 2;
+                int ty = y + (tamCasilla + fm.getAscent()) / 2 - 4;
+
+                g2d.drawString(inicial, tx, ty);
+            }
         }
 
-        // --- Dibujar pasillos ---
+        // --------------------------------------------------------------------
+        // 2. DIBUJAR PASILLOS
+        // --------------------------------------------------------------------
         for (List<Casilla> pasillo : tablero.getPasillos().values()) {
             for (Casilla c : pasillo) {
                 Point p = c.getPosicion();
@@ -104,19 +133,22 @@ public class TableroPanel extends JPanel {
             }
         }
 
-        // --- Dibujar bases ---
+        // --------------------------------------------------------------------
+        // 3. DIBUJAR BASES Y FICHAS EN BASE
+        // --------------------------------------------------------------------
         for (String color : new String[]{"Rojo", "Amarillo", "Verde", "Azul"}) {
             Point inicio = tablero.getPosicionesBase(color)[0];
             dibujarBaseConFichas(g2d, offsetX, offsetY, color, inicio);
         }
 
-        // --- Dibujar fichas fuera de base ---
+        // --------------------------------------------------------------------
+        // 4. FICHAS EN TABLERO
+        // --------------------------------------------------------------------
         int fichaSize = tamCasilla - 10;
         for (Jugador jugador : jugadores) {
             for (Ficha ficha : jugador.getFichas()) {
-                if (ficha.isEnBase()) {
-                    continue;
-                }
+
+                if (ficha.isEnBase()) continue;
 
                 Point pos = ficha.getPosicion();
                 int fx = offsetX + pos.x * tamCasilla + 5;
@@ -143,40 +175,38 @@ public class TableroPanel extends JPanel {
             }
         }
 
-        // --- Dibujar dados ---
+        // --------------------------------------------------------------------
+        // 5. DADOS
+        // --------------------------------------------------------------------
         dibujarDado(g2d, offsetX - 80, getHeight() / 2 - 60, dado1);
         dibujarDado(g2d, offsetX - 80, getHeight() / 2 + 10, dado2);
 
-        // --- Dibujar información de jugadores ---
-        int infoX = offsetX + tableroSize + 20; // posición a la derecha del tablero
-        int infoY = offsetY; // inicio vertical
+        // --------------------------------------------------------------------
+        // 6. INFORMACIÓN DE JUGADORES
+        // --------------------------------------------------------------------
+        int infoX = offsetX + tableroSize + 10; 
+        int infoY = offsetY + 300;
 
         g2d.setColor(Color.BLACK);
-        g2d.setFont(new Font("Arial", Font.BOLD, 14));
+        g2d.setFont(new Font("Arial", Font.BOLD, 25));
 
         for (Jugador jugador : jugadores) {
-            // Contar fichas en base y en juego
             int enBase = 0;
             int enJuego = 0;
+
             for (Ficha f : jugador.getFichas()) {
-                if (f.isEnBase()) {
-                    enBase++;
-                } else {
-                    enJuego++;
-                }
+                if (f.isEnBase()) enBase++;
+                else enJuego++;
             }
 
-            // Crear el texto con los contadores
             String texto = jugador.getColorStr() + ": " + enBase + " en base, " + enJuego + " en juego";
 
-            // Dibujar el texto
             g2d.drawString(texto, infoX, infoY);
-
-            // Separación vertical entre jugadores
-            infoY += 25;
+            infoY += 20;
         }
-
     }
+
+    // ------------------- (resto de métodos NO cambiados) -------------------
 
     private void dibujarDado(Graphics2D g2d, int x, int y, int valor) {
         int size = 50;
@@ -190,112 +220,73 @@ public class TableroPanel extends JPanel {
         int cy = y + size / 2;
 
         switch (valor) {
-
-            case 1:
-                g2d.fillOval(cx - dot / 2, cy - dot / 2, dot, dot);
-                break;
+            case 1: g2d.fillOval(cx - dot/2, cy - dot/2, dot, dot); break;
             case 2:
                 g2d.fillOval(x + 10, y + 10, dot, dot);
                 g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
                 break;
             case 3:
                 g2d.fillOval(x + 10, y + 10, dot, dot);
-                g2d.fillOval(cx - dot / 2, cy - dot / 2, dot, dot);
+                g2d.fillOval(cx - dot/2, cy - dot/2, dot, dot);
                 g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
                 break;
-
             case 4:
-
                 g2d.fillOval(x + 10, y + 10, dot, dot);
                 g2d.fillOval(x + size - 20, y + 10, dot, dot);
                 g2d.fillOval(x + 10, y + size - 20, dot, dot);
                 g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
-
                 break;
-
             case 5:
-                // Arriba izquierda
                 g2d.fillOval(x + 10, y + 10, dot, dot);
-                // Arriba derecha
                 g2d.fillOval(x + size - 20, y + 10, dot, dot);
-                // Centro
-                g2d.fillOval(cx - dot / 2, cy - dot / 2, dot, dot);
-                // Abajo izquierda
+                g2d.fillOval(cx - dot/2, cy - dot/2, dot, dot);
                 g2d.fillOval(x + 10, y + size - 20, dot, dot);
-                // Abajo derecha
                 g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
                 break;
-
             case 6:
-
                 g2d.fillOval(x + 10, y + 10, dot, dot);
-                g2d.fillOval(x + 10, y + size / 2 - dot / 2, dot, dot);
+                g2d.fillOval(x + 10, y + size/2 - dot/2, dot, dot);
                 g2d.fillOval(x + 10, y + size - 20, dot, dot);
                 g2d.fillOval(x + size - 20, y + 10, dot, dot);
-                g2d.fillOval(x + size - 20, y + size / 2 - dot / 2, dot, dot);
+                g2d.fillOval(x + size - 20, y + size/2 - dot/2, dot, dot);
                 g2d.fillOval(x + size - 20, y + size - 20, dot, dot);
-
                 break;
         }
     }
 
     private void dibujarBaseConFichas(Graphics2D g2d, int offsetX, int offsetY, String color, Point inicio) {
-
         Image imagenBase = null;
         Color fallbackColor;
 
-        // 1. Asignar la imagen y definir un color de respaldo con transparencia
         switch (color) {
-            case "Rojo":
-                imagenBase = imagenRojo;
-                fallbackColor = new Color(255, 0, 0, 100);
-                break;
-            case "Amarillo":
-                imagenBase = imagenAmarillo;
-                fallbackColor = new Color(255, 255, 0, 100);
-                break;
-            case "Verde":
-                imagenBase = imagenVerde;
-                fallbackColor = new Color(0, 255, 0, 100);
-                break;
-            case "Azul":
-                imagenBase = imagenAzul;
-                fallbackColor = new Color(0, 0, 255, 100);
-                break;
-            default:
-                fallbackColor = new Color(200, 200, 200, 100);
-                break;
+            case "Rojo": imagenBase = imagenRojo; fallbackColor = new Color(255, 0, 0, 100); break;
+            case "Amarillo": imagenBase = imagenAmarillo; fallbackColor = new Color(255, 255, 0, 100); break;
+            case "Verde": imagenBase = imagenVerde; fallbackColor = new Color(0, 255, 0, 100); break;
+            case "Azul": imagenBase = imagenAzul; fallbackColor = new Color(0, 0, 255, 100); break;
+            default: fallbackColor = new Color(200, 200, 200, 100); break;
         }
 
         int baseSize = 7 * tamCasilla;
         int x = offsetX + inicio.x * tamCasilla - (baseSize - tamCasilla) / 2;
         int y = offsetY + inicio.y * tamCasilla - (baseSize - tamCasilla) / 2;
 
-        // 2. Dibujar: Si la imagen está cargada, dibujar la imagen; si no, dibujar el color.
         if (imagenBase != null) {
-            // Dibuja la imagen escalada para que ocupe todo el espacio de la base
             g2d.drawImage(imagenBase, x, y, baseSize, baseSize, this);
         } else {
-            // Dibuja el color de respaldo con la transparencia definida (comportamiento original)
             g2d.setColor(fallbackColor);
             g2d.fillRect(x, y, baseSize, baseSize);
         }
 
-        // Dibujar fichas dentro de la base (código original sin cambios)
         int fichaSize = tamCasilla - 10;
         int padding = (baseSize - 2 * fichaSize) / 3;
 
         for (Jugador jugador : jugadores) {
-            if (!jugador.getColorStr().equals(color)) {
-                continue;
-            }
+            if (!jugador.getColorStr().equals(color)) continue;
 
             List<Ficha> fichas = jugador.getFichas();
             for (int i = 0; i < fichas.size(); i++) {
                 Ficha f = fichas.get(i);
-                if (!f.isEnBase()) {
-                    continue;
-                }
+                if (!f.isEnBase()) continue;
 
                 int row = i / 2;
                 int col = i % 2;
@@ -318,9 +309,7 @@ public class TableroPanel extends JPanel {
     }
 
     private Color adaptarColor(Color colorOriginal) {
-        if (!modoOscuro) {
-            return colorOriginal;
-        }
+        if (!modoOscuro) return colorOriginal;
         int r = Math.max(0, colorOriginal.getRed() - 50);
         int g = Math.max(0, colorOriginal.getGreen() - 50);
         int b = Math.max(0, colorOriginal.getBlue() - 50);

@@ -81,7 +81,9 @@ public class JuegoParquesGUI extends JFrame {
     }
 
     private Color obtenerColor(String c) {
-        if (c == null) return Color.WHITE;
+        if (c == null) {
+            return Color.WHITE;
+        }
 
         switch (c.toUpperCase()) {
             case "ROJO":
@@ -260,4 +262,12 @@ public class JuegoParquesGUI extends JFrame {
             panelTablero.actualizar();
         }
     }
+
+    public void actualizarColorBarraPorTurno(Color colorJugador) {
+        if (barraSuperior != null) {
+            barraSuperior.setBackground(colorJugador);
+            barraSuperior.repaint();
+        }
+    }
+
 }

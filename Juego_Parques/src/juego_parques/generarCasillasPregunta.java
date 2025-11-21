@@ -1,37 +1,119 @@
 package juego_parques;
 
-import javax.swing.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class generarCasillasPregunta {
 
-     private String pregunta;
+    private String pregunta;
     private String respuestaCorrecta;
     private String categoria;
     private String dificultad;
 
-    // ------------------- Preguntas por categoría y nivel -------------------
-    private static final List<String[]> PREGUNTAS_PROGRAMACION_FACIL = new ArrayList<>();
-    private static final List<String[]> PREGUNTAS_PROGRAMACION_MEDIO = new ArrayList<>();
-    private static final List<String[]> PREGUNTAS_PROGRAMACION_AVANZADO = new ArrayList<>();
+    private static final Map<String, Set<String>> preguntasUsadas = new HashMap<>();
 
-    private static final List<String[]> PREGUNTAS_INGLES_FACIL = new ArrayList<>();
-    private static final List<String[]> PREGUNTAS_INGLES_MEDIO = new ArrayList<>();
-    private static final List<String[]> PREGUNTAS_INGLES_AVANZADO = new ArrayList<>();
+    // ------------------- LISTAS DE PREGUNTAS -------------------
+    public static final List<String[]> PREGUNTAS_PROGRAMACION_FACIL = new ArrayList<>();
+    public static final List<String[]> PREGUNTAS_PROGRAMACION_MEDIO = new ArrayList<>();
+    public static final List<String[]> PREGUNTAS_PROGRAMACION_AVANZADO = new ArrayList<>();
 
-    private static final List<String[]> PREGUNTAS_HISTORIA_FACIL = new ArrayList<>();
-    private static final List<String[]> PREGUNTAS_HISTORIA_MEDIO = new ArrayList<>();
-    private static final List<String[]> PREGUNTAS_HISTORIA_AVANZADO = new ArrayList<>();
+    public static final List<String[]> PREGUNTAS_INGLES_FACIL = new ArrayList<>();
+    public static final List<String[]> PREGUNTAS_INGLES_MEDIO = new ArrayList<>();
+    public static final List<String[]> PREGUNTAS_INGLES_AVANZADO = new ArrayList<>();
 
-    private static final List<String[]> PREGUNTAS_MATEMATICAS_FACIL = new ArrayList<>();
-    private static final List<String[]> PREGUNTAS_MATEMATICAS_MEDIO = new ArrayList<>();
-    private static final List<String[]> PREGUNTAS_MATEMATICAS_AVANZADO = new ArrayList<>();
+    public static final List<String[]> PREGUNTAS_HISTORIA_FACIL = new ArrayList<>();
+    public static final List<String[]> PREGUNTAS_HISTORIA_MEDIO = new ArrayList<>();
+    public static final List<String[]> PREGUNTAS_HISTORIA_AVANZADO = new ArrayList<>();
 
-    private static final Map<String, List<String[]>> preguntasUsadas = new HashMap<>();
+    public static final List<String[]> PREGUNTAS_MATEMATICAS_FACIL = new ArrayList<>();
+    public static final List<String[]> PREGUNTAS_MATEMATICAS_MEDIO = new ArrayList<>();
+    public static final List<String[]> PREGUNTAS_MATEMATICAS_AVANZADO = new ArrayList<>();
+
+    // ------------------- CONSTRUCTOR -------------------
+    public generarCasillasPregunta(String categoria, String dificultad) {
+        this.categoria = categoria;
+        this.dificultad = dificultad;
+        asignarPreguntaAleatoria();
+    }
+
+    // ------------------- GETTERS -------------------
+    public String getPregunta() { return pregunta; }
+    public String getRespuestaCorrecta() { return respuestaCorrecta; }
+    public String getCategoria() { return categoria; }
+    public String getDificultad() { return dificultad; }
+
+    // ---------------- GENERAR UNA PREGUNTA DESDE OTRA CLASE ----------------
+    public static generarCasillasPregunta generarPregunta(String categoria, String dificultad) {
+        return new generarCasillasPregunta(categoria, dificultad);
+    }
+
+    // ------------------- ELEGIR PREGUNTA -------------------
+    private void asignarPreguntaAleatoria() {
+
+        List<String[]> lista = obtenerListaSegunCategoriaYDificultad(categoria, dificultad);
+
+        if (lista == null || lista.isEmpty()) {
+            pregunta = "No hay preguntas disponibles.";
+            respuestaCorrecta = "";
+            return;
+        }
+
+        String clave = categoria.toLowerCase().trim() + "-" + dificultad.toLowerCase().trim();
+        preguntasUsadas.putIfAbsent(clave, new HashSet<String>());
+        Set<String> usadas = preguntasUsadas.get(clave);
+
+        List<String[]> disponibles = new ArrayList<>();
+        for (String[] q : lista) {
+            if (!usadas.contains(q[0])) {
+                disponibles.add(q);
+            }
+        }
+
+        if (disponibles.isEmpty()) {
+            usadas.clear();
+            disponibles.addAll(lista);
+        }
+
+        Random r = new Random();
+        String[] seleccionada = disponibles.get(r.nextInt(disponibles.size()));
+        pregunta = seleccionada[0];
+        respuestaCorrecta = seleccionada[1];
+        usadas.add(pregunta);
+    }
+
+    private List<String[]> obtenerListaSegunCategoriaYDificultad(String cat, String dif) {
+        if (cat == null || dif == null) return Collections.emptyList();
+        cat = cat.toLowerCase().trim();
+        dif = dif.toLowerCase().trim();
+
+        if (cat.equals("programación") || cat.equals("programación java básica")) {
+            if (dif.equals("fácil")) return PREGUNTAS_PROGRAMACION_FACIL;
+            if (dif.equals("medio")) return PREGUNTAS_PROGRAMACION_MEDIO;
+            if (dif.equals("avanzado")) return PREGUNTAS_PROGRAMACION_AVANZADO;
+        }
+
+        if (cat.equals("inglés") || cat.equals("inglés básico")) {
+            if (dif.equals("fácil")) return PREGUNTAS_INGLES_FACIL;
+            if (dif.equals("medio")) return PREGUNTAS_INGLES_MEDIO;
+            if (dif.equals("avanzado")) return PREGUNTAS_INGLES_AVANZADO;
+        }
+
+        if (cat.equals("historia") || cat.equals("historia de la computación")) {
+            if (dif.equals("fácil")) return PREGUNTAS_HISTORIA_FACIL;
+            if (dif.equals("medio")) return PREGUNTAS_HISTORIA_MEDIO;
+            if (dif.equals("avanzado")) return PREGUNTAS_HISTORIA_AVANZADO;
+        }
+
+        if (cat.equals("matemáticas")) {
+            if (dif.equals("fácil")) return PREGUNTAS_MATEMATICAS_FACIL;
+            if (dif.equals("medio")) return PREGUNTAS_MATEMATICAS_MEDIO;
+            if (dif.equals("avanzado")) return PREGUNTAS_MATEMATICAS_AVANZADO;
+        }
+
+        return Collections.emptyList();
+    }
+
+    // ------------------- EJEMPLO DE PREGUNTAS -------------------
+    
 
     static {
         // ------------------- Programación Java -------------------
@@ -290,98 +372,5 @@ public class generarCasillasPregunta {
         PREGUNTAS_MATEMATICAS_AVANZADO.add(new String[]{"Suma de decimales: 3.75 + 2.125", "5.875"});
         PREGUNTAS_MATEMATICAS_AVANZADO.add(new String[]{"Resta de decimales: 9.8 - 4.65", "5.15"});
 
-    }
-
-    // ------------------- Constructor -------------------
-    public generarCasillasPregunta(String categoria, String dificultad) {
-        this.categoria = categoria;
-        this.dificultad = dificultad;
-        generarPregunta();
-    }
-
-    private void generarPregunta() {
-        List<String[]> listaPreguntas = obtenerListaPorCategoriaYNivel(categoria, dificultad);
-
-        if (listaPreguntas.isEmpty()) {
-            pregunta = "Error: categoría no definida";
-            respuestaCorrecta = "";
-            return;
-        }
-
-        // Inicializar lista de preguntas usadas si no existe
-        String key = categoria + "_" + dificultad;
-        preguntasUsadas.putIfAbsent(key, new ArrayList<>());
-
-        List<String[]> disponibles = new ArrayList<>();
-        for (String[] p : listaPreguntas) {
-            if (!preguntasUsadas.get(key).contains(p)) {
-                disponibles.add(p);
-            }
-        }
-
-        if (disponibles.isEmpty()) {
-            // Reinicia si ya se usaron todas
-            preguntasUsadas.get(key).clear();
-            disponibles.addAll(listaPreguntas);
-        }
-
-        Random rand = new Random();
-        int idx = rand.nextInt(disponibles.size());
-        String[] seleccion = disponibles.get(idx);
-
-        pregunta = seleccion[0];
-        respuestaCorrecta = seleccion[1];
-        preguntasUsadas.get(key).add(seleccion);
-    }
-
-    private List<String[]> obtenerListaPorCategoriaYNivel(String categoria, String dificultad) {
-        switch (categoria) {
-            case "Programación Java básica":
-                switch (dificultad.toLowerCase()) {
-                    case "fácil": return PREGUNTAS_PROGRAMACION_FACIL;
-                    case "medio": return PREGUNTAS_PROGRAMACION_MEDIO;
-                    default: return PREGUNTAS_PROGRAMACION_AVANZADO;
-                }
-            case "Inglés básico":
-                switch (dificultad.toLowerCase()) {
-                    case "fácil": return PREGUNTAS_INGLES_FACIL;
-                    case "medio": return PREGUNTAS_INGLES_MEDIO;
-                    default: return PREGUNTAS_INGLES_AVANZADO;
-                }
-            case "Historia de la computación":
-                switch (dificultad.toLowerCase()) {
-                    case "fácil": return PREGUNTAS_HISTORIA_FACIL;
-                    case "medio": return PREGUNTAS_HISTORIA_MEDIO;
-                    default: return PREGUNTAS_HISTORIA_AVANZADO;
-                }
-            case "Matemáticas":
-                switch (dificultad.toLowerCase()) {
-                    case "fácil": return PREGUNTAS_MATEMATICAS_FACIL;
-                    case "medio": return PREGUNTAS_MATEMATICAS_MEDIO;
-                    default: return PREGUNTAS_MATEMATICAS_AVANZADO;
-                }
-            default:
-                return new ArrayList<>();
-        }
-    }
-
-    // ------------------- Método para hacer la pregunta -------------------
-    public boolean hacerPregunta() {
-        String input = JOptionPane.showInputDialog(
-                null,
-                pregunta,
-                "Pregunta - " + categoria + " (" + dificultad + ")",
-                JOptionPane.QUESTION_MESSAGE
-        );
-        if (input == null) return false;
-        return input.trim().equalsIgnoreCase(respuestaCorrecta);
-    }
-
-    public String getPregunta() {
-        return pregunta;
-    }
-
-    public String getRespuestaCorrecta() {
-        return respuestaCorrecta;
     }
 }
